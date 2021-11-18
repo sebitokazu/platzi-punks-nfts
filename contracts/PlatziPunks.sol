@@ -5,6 +5,8 @@ import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
+import "./Base64.sol";
 
 
 contract PlatziPunks is ERC721, ERC721Enumerable{
@@ -22,6 +24,30 @@ contract PlatziPunks is ERC721, ERC721Enumerable{
         _tokenIdCounter.increment();
         require (tokenId <= maxSupply, "All PlatziPunks are minted.");
         _safeMint(msg.sender, tokenId);
+    }
+
+    function tokenURI(uint256 _tokenId) public view override returns (string memory){
+        require(
+            _exists(_tokenId),
+            "ERC721 Metadata: URI query for non-existent query"
+            );
+        
+        string memory jsonURI = Base64.encode(
+            abi.encodePacked(
+                '{ "name": "PlatziPunks #',
+                _tokenId,
+                '", "description": "Platzi Avatars from Intro to Dapp development @ platzi.com",',
+                '"image":"',
+                //TODO: get image url,
+                '", "background-color":"6f6eb4", "youtube_url":"https://www.youtube.com/watch?v=dQw4w9WgXcQ"},',
+                '"attributes": [',
+                '{"display_type":"date","trait_type":"birthday","value":',
+                block.timestamp,
+                '}]'
+                )
+            );
+
+        return string(abi.encodePacked("data:application/json;base64,",jsonURI));
     }
 
     // The following functions are overrides required by Solidity.
