@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "./Base64.sol";
+import "./ADNBase.sol";
 
 
 contract PlatziPunks is ERC721, ERC721Enumerable{
@@ -43,7 +44,9 @@ contract PlatziPunks is ERC721, ERC721Enumerable{
                 '"attributes": [',
                 '{"display_type":"date","trait_type":"birthday","value":',
                 block.timestamp,
-                '}]'
+                '},',
+                '{"trait_type":"Accessories","value":""},{"trait_type":"Clothe Color","value":""},{"trait_type":"Clothe Type","value":""},{"trait_type":"Eye Type","value":""},{"trait_type":"Eyebrow Type","value":""},{"trait_type":"Facial Hair Color","value":""},{"trait_type":"Facial Hair Type","value":""},{"trait_type":"Hair Color","value":""},{"trait_type":"Hat Color","value":""},{"trait_type":"Graphic Type","value":""},{"trait_type":"Mouth Type","value":""},{"trait_type":"Skin Color","value":""},{"trait_type":"Top Type","value":""}',
+                ']'
                 )
             );
 
