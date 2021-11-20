@@ -11,6 +11,7 @@ import "./ADNBase.sol";
 
 contract PlatziPunks is ERC721, ERC721Enumerable, ADNBase {
     using Counters for Counters.Counter;
+    using Strings for uint256;
 
     Counters.Counter private _tokenIdCounter;
     uint256 public maxSupply;
@@ -23,13 +24,13 @@ contract PlatziPunks is ERC721, ERC721Enumerable, ADNBase {
     function mint() public {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
-        require(tokenId <= maxSupply, "All PlatziPunks are minted.");
+        require(tokenId < maxSupply, "All PlatziPunks are minted.");
         tokenDNA[tokenId] = getDNA(tokenId, msg.sender, block.number);
         _safeMint(msg.sender, tokenId);
     }
 
     function _baseURI() internal pure override returns (string memory) {
-        return "https://avataars.io/";
+        return "https://avataaars.io/";
     }
 
     function _paramsURI(uint256 _dna) internal view returns (string memory) {
@@ -102,11 +103,11 @@ contract PlatziPunks is ERC721, ERC721Enumerable, ADNBase {
             jsonURI = string(
                 abi.encodePacked(
                     '{ "name": "PlatziPunks #',
-                    _tokenId,
+                    _tokenId.toString(),
                     '", "description": "Platzi Avatars from Intro to Dapp development @ platzi.com",',
                     '"image":"',
                     imgUrl,
-                    '", "background-color":"6f6eb4", "youtube_url":"https://www.youtube.com/watch?v=dQw4w9WgXcQ"},',
+                    '", "background-color":"6f6eb4", "youtube_url":"https://www.youtube.com/watch?v=dQw4w9WgXcQ",',
                     '"attributes": ['
                 )
             );
@@ -152,15 +153,23 @@ contract PlatziPunks is ERC721, ERC721Enumerable, ADNBase {
             );
         }
 
-        return
-            string(
+        {
+            jsonURI = Base64.encode(
                 abi.encodePacked(
-                    "data:application/json;base64,",
                     jsonURI,
                     attrMetadataPartA,
                     ",",
                     attrMetadataPartB,
                     "]}"
+                )
+            );
+        }
+
+        return
+            string(
+                abi.encodePacked(
+                    "data:application/json;base64,",
+                    jsonURI
                 )
             );
     }
