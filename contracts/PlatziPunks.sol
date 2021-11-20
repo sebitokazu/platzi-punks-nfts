@@ -9,56 +9,169 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "./Base64.sol";
 import "./ADNBase.sol";
 
-
-contract PlatziPunks is ERC721, ERC721Enumerable{
+contract PlatziPunks is ERC721, ERC721Enumerable, ADNBase {
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdCounter;
     uint256 public maxSupply;
+    mapping(uint256 => uint256) public tokenDNA;
 
-    constructor(uint256 _maxSupply) ERC721("PlatziPunks","PLPKS"){
+    constructor(uint256 _maxSupply) ERC721("PlatziPunks", "PLPKS") {
         maxSupply = _maxSupply;
     }
 
     function mint() public {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
-        require (tokenId <= maxSupply, "All PlatziPunks are minted.");
+        require(tokenId <= maxSupply, "All PlatziPunks are minted.");
+        tokenDNA[tokenId] = getDNA(tokenId, msg.sender, block.number);
         _safeMint(msg.sender, tokenId);
     }
 
-    function tokenURI(uint256 _tokenId) public view override returns (string memory){
+    function _baseURI() internal pure override returns (string memory) {
+        return "https://avataars.io/";
+    }
+
+    function _paramsURI(uint256 _dna) internal view returns (string memory) {
+        string memory params;
+        {
+            params = string(
+                abi.encodePacked(
+                    "accessoriesType=",
+                    getAccessoriesType(_dna),
+                    "&clotheColor=",
+                    getClotheColor(_dna),
+                    "&clotheType=",
+                    getClotheType(_dna),
+                    "&eyeType=",
+                    getEyeType(_dna),
+                    "&eyebrowType=",
+                    getEyeBrowType(_dna),
+                    "&facialHairColor=",
+                    getFacialHairColor(_dna),
+                    "&facialHairType=",
+                    getFacialHairType(_dna),
+                    "&hairColor=",
+                    getHairColor(_dna),
+                    "&hatColor=",
+                    getHatColor(_dna),
+                    "&graphicType=",
+                    getGraphicType(_dna)
+                )
+            );
+        }
+
+        return
+            string(
+                abi.encodePacked(
+                    params,
+                    "&mouthType=",
+                    getMouthType(_dna),
+                    "&skinColor=",
+                    getSkinColor(_dna),
+                    "&topType=",
+                    getTopType(_dna)
+                )
+            );
+    }
+
+    function _getFullUri(uint256 _dna) public view returns (string memory) {
+        return string(abi.encodePacked(_baseURI(), "?", _paramsURI(_dna)));
+    }
+
+    function tokenURI(uint256 _tokenId)
+        public
+        view
+        override
+        returns (string memory)
+    {
         require(
             _exists(_tokenId),
             "ERC721 Metadata: URI query for non-existent query"
-            );
-        
-        string memory jsonURI = Base64.encode(
-            abi.encodePacked(
-                '{ "name": "PlatziPunks #',
-                _tokenId,
-                '", "description": "Platzi Avatars from Intro to Dapp development @ platzi.com",',
-                '"image":"',
-                //TODO: get image url,
-                '", "background-color":"6f6eb4", "youtube_url":"https://www.youtube.com/watch?v=dQw4w9WgXcQ"},',
-                '"attributes": [',
-                '{"display_type":"date","trait_type":"birthday","value":',
-                block.timestamp,
-                '},',
-                '{"trait_type":"Accessories","value":""},{"trait_type":"Clothe Color","value":""},{"trait_type":"Clothe Type","value":""},{"trait_type":"Eye Type","value":""},{"trait_type":"Eyebrow Type","value":""},{"trait_type":"Facial Hair Color","value":""},{"trait_type":"Facial Hair Type","value":""},{"trait_type":"Hair Color","value":""},{"trait_type":"Hat Color","value":""},{"trait_type":"Graphic Type","value":""},{"trait_type":"Mouth Type","value":""},{"trait_type":"Skin Color","value":""},{"trait_type":"Top Type","value":""}',
-                ']'
+        );
+        uint256 dna = tokenDNA[_tokenId];
+
+        string memory imgUrl;
+        {
+            imgUrl = _getFullUri(dna);
+        }
+        string memory jsonURI;
+        string memory attrMetadataPartA;
+        string memory attrMetadataPartB;
+        {
+            jsonURI = string(
+                abi.encodePacked(
+                    '{ "name": "PlatziPunks #',
+                    _tokenId,
+                    '", "description": "Platzi Avatars from Intro to Dapp development @ platzi.com",',
+                    '"image":"',
+                    imgUrl,
+                    '", "background-color":"6f6eb4", "youtube_url":"https://www.youtube.com/watch?v=dQw4w9WgXcQ"},',
+                    '"attributes": ['
                 )
             );
+        }
+        {
+            attrMetadataPartA = string(
+                abi.encodePacked(
+                    '{"trait_type":"Accessories","value":"',
+                    getAccessoriesType(dna),
+                    '"},{"trait_type":"Clothe Color","value":"',
+                    getClotheColor(dna),
+                    '"},{"trait_type":"Clothe Type","value":"',
+                    getClotheType(dna),
+                    '"},{"trait_type":"Eye Type","value":"',
+                    getEyeType(dna),
+                    '"},{"trait_type":"Eyebrow Type","value":"',
+                    getEyeBrowType(dna),
+                    '"},{"trait_type":"Facial Hair Color","value":"',
+                    getFacialHairColor(dna),
+                    '"},{"trait_type":"Facial Hair Type","value":"',
+                    getFacialHairType(dna),
+                    '"}'
+                )
+            );
+        }
+        {
+            attrMetadataPartB = string(
+                abi.encodePacked(
+                    '{"trait_type":"Hair Color","value":"',
+                    getHairColor(dna),
+                    '"},{"trait_type":"Hat Color","value":"',
+                    getHatColor(dna),
+                    '"},{"trait_type":"Graphic Type","value":"',
+                    getGraphicType(dna),
+                    '"},{"trait_type":"Mouth Type","value":"',
+                    getMouthType(dna),
+                    '"},{"trait_type":"Skin Color","value":"',
+                    getSkinColor(dna),
+                    '"},{"trait_type":"Top Type","value":"',
+                    getTopType(dna),
+                    '"}'
+                )
+            );
+        }
 
-        return string(abi.encodePacked("data:application/json;base64,",jsonURI));
+        return
+            string(
+                abi.encodePacked(
+                    "data:application/json;base64,",
+                    jsonURI,
+                    attrMetadataPartA,
+                    ",",
+                    attrMetadataPartB,
+                    "]}"
+                )
+            );
     }
 
     // The following functions are overrides required by Solidity.
 
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId)
-        internal
-        override(ERC721, ERC721Enumerable)
-    {
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal override(ERC721, ERC721Enumerable) {
         super._beforeTokenTransfer(from, to, tokenId);
     }
 
@@ -70,5 +183,4 @@ contract PlatziPunks is ERC721, ERC721Enumerable{
     {
         return super.supportsInterface(interfaceId);
     }
-
 }
