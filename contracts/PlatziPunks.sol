@@ -23,10 +23,10 @@ contract PlatziPunks is ERC721, ERC721Enumerable, ADNBase {
 
     function mint() public {
         uint256 tokenId = _tokenIdCounter.current();
-        _tokenIdCounter.increment();
         require(tokenId < maxSupply, "All PlatziPunks are minted.");
         tokenDNA[tokenId] = getDNA(tokenId, msg.sender, block.number);
         _safeMint(msg.sender, tokenId);
+        _tokenIdCounter.increment();
     }
 
     function _baseURI() internal pure override returns (string memory) {
@@ -107,7 +107,7 @@ contract PlatziPunks is ERC721, ERC721Enumerable, ADNBase {
                     '", "description": "Platzi Avatars from Intro to Dapp development @ platzi.com",',
                     '"image":"',
                     imgUrl,
-                    '", "background-color":"6f6eb4", "youtube_url":"https://www.youtube.com/watch?v=dQw4w9WgXcQ",',
+                    '", "background-color":"6f6eb4",',
                     '"attributes": ['
                 )
             );

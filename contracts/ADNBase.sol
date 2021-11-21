@@ -214,8 +214,8 @@ contract ADNBase {
 
     function _getDNASection(uint256 _dna, uint8 offset) internal pure returns (uint8){
         return uint8(
-        (_dna % 1*10**(offset + ADN_SECTION_SIZE))
-        /1*10 ** (offset));
+        (_dna % (1*10**(offset + ADN_SECTION_SIZE)))
+        /(1*10 ** (offset)));
     }
 
     function getAccessoriesType(uint256 _dna)

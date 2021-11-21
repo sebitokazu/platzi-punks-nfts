@@ -59,7 +59,7 @@ describe('Platzi Punks', () => {
 
             const metadata = JSON.parse(stringifiedMetadata);
 
-            expect(metadata).to.have.all.keys("name", "description", "image", "background-color", "youtube_url","attributes");
+            expect(metadata).to.have.all.keys("name", "description", "image", "background-color","attributes");
             expect(metadata.attributes).to.have.lengthOf(13);
         });
     });
