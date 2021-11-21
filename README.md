@@ -1,15 +1,15 @@
-# Basic Sample Hardhat Project
+# Platzi Punks from Intro to Dapps @ platzi.com
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts.
+ERC721 compliant NFT's dapp, that mints avatars based on [avataars.com](https://getavataaars.com/), using pseudo-random DNA to mix-up attributes. 
 
-Try running some of the following tasks:
+## Live on Rinkeby testnet
 
-```shell
-npx hardhat accounts
-npx hardhat compile
-npx hardhat clean
-npx hardhat test
-npx hardhat node
-node scripts/sample-script.js
-npx hardhat help
-```
+Check the collection at OpenSea: https://testnets.opensea.io/collection/platzipunks-dgdn1ujonp
+
+Or check the contract at Etherscan: https://rinkeby.etherscan.io/address/0x7DDb8a3545E37a330d1A9C710B84a3a78D39e2D8#writeContract
+
+## Tech stack
+* Solidity
+* Hardhat
+* OpenZeppelin smart contract's
+* Mocha/Chai and Ethers/Waffle
