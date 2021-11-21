@@ -8,24 +8,34 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "./Base64.sol";
 import "./ADNBase.sol";
+import "@chainlink/contracts/src/v0.8/VRFConsumerBase.sol";
 
-contract PlatziPunks is ERC721, ERC721Enumerable, ADNBase {
+contract PlatziPunks is ERC721, ERC721Enumerable, ADNBase, VRFConsumerBase {
     using Counters for Counters.Counter;
     using Strings for uint256;
 
     Counters.Counter private _tokenIdCounter;
     uint256 public maxSupply;
     mapping(uint256 => uint256) public tokenDNA;
+    mapping(bytes32 => uint256) private tokenRandomnessResult;
+    mapping(uint256 => address) private tokenMinter;
 
-    constructor(uint256 _maxSupply) ERC721("PlatziPunks", "PLPKS") {
+    bytes32 private _keyHash = 0x2ed0feb3e7fd2022120aa84fab1945545a9f2ffc9076fd6156fa96eaff4c1311;
+    uint256 private _oracleFee = 0.1 * 10 ** 18; // 0.1 LINK
+
+
+    constructor(uint256 _maxSupply) 
+    ERC721("PlatziPunks", "PLPKS") 
+    VRFConsumerBase(0xb3dCcb4Cf7a26f6cf6B120Cf5A73875B7BBc655B, 0x01BE23585060835E02B77ef475b0Cc51aA1e0709) {
         maxSupply = _maxSupply;
     }
 
     function mint() public {
         uint256 tokenId = _tokenIdCounter.current();
         require(tokenId < maxSupply, "All PlatziPunks are minted.");
-        tokenDNA[tokenId] = getDNA(tokenId, msg.sender, block.number);
-        _safeMint(msg.sender, tokenId);
+        bytes32 requestId = getRandomNumber();
+        tokenRandomnessResult[requestId] = tokenId;
+        tokenMinter[tokenId] = msg.sender; 
         _tokenIdCounter.increment();
     }
 
@@ -191,5 +201,22 @@ contract PlatziPunks is ERC721, ERC721Enumerable, ADNBase {
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
+    }
+
+     /** 
+     * Requests randomness 
+     */
+    function getRandomNumber() public returns (bytes32 requestId) {
+        require(LINK.balanceOf(address(this)) >= _oracleFee, "Not enough LINK - fill contract with faucet");
+        return requestRandomness(_keyHash, _oracleFee);
+    }
+
+    /**
+     * Callback function used by VRF Coordinator
+     */
+    function fulfillRandomness(bytes32 requestId, uint256 randomness) internal override {
+        uint256 tokenId = tokenRandomnessResult[requestId];
+        tokenDNA[tokenId] = getDNA(tokenId, tokenMinter[tokenId], randomness);
+        _safeMint(msg.sender, tokenId);
     }
 }
