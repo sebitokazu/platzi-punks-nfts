@@ -13,3 +13,6 @@ Or check the contract at Etherscan: https://rinkeby.etherscan.io/address/0x7DDb8
 * Hardhat
 * OpenZeppelin smart contract's
 * Mocha/Chai and Ethers/Waffle
+
+### Random Platzi Punk using Chainlink Oracles 🔽
+Checkout chainlink-oracle branch to mint a complete random Platzi Punk using Chainlink VRF
