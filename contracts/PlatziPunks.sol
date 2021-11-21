@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "hardhat/console.sol";
+import "hardhat/console.sol";//Delete on deployment to reduce file size TODO: optimize code
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
@@ -35,7 +35,8 @@ contract PlatziPunks is ERC721, ERC721Enumerable, ADNBase, VRFConsumerBase {
         require(tokenId < maxSupply, "All PlatziPunks are minted.");
         bytes32 requestId = getRandomNumber();
         tokenRandomnessResult[requestId] = tokenId;
-        tokenMinter[tokenId] = msg.sender; 
+        tokenMinter[tokenId] = msg.sender;
+        _safeMint(msg.sender, tokenId); 
         _tokenIdCounter.increment();
     }
 
@@ -60,14 +61,10 @@ contract PlatziPunks is ERC721, ERC721Enumerable, ADNBase, VRFConsumerBase {
                     getEyeBrowType(_dna),
                     "&facialHairColor=",
                     getFacialHairColor(_dna),
-                    "&facialHairType=",
-                    getFacialHairType(_dna),
                     "&hairColor=",
                     getHairColor(_dna),
                     "&hatColor=",
-                    getHatColor(_dna),
-                    "&graphicType=",
-                    getGraphicType(_dna)
+                    getHatColor(_dna)
                 )
             );
         }
@@ -137,8 +134,6 @@ contract PlatziPunks is ERC721, ERC721Enumerable, ADNBase, VRFConsumerBase {
                     getEyeBrowType(dna),
                     '"},{"trait_type":"Facial Hair Color","value":"',
                     getFacialHairColor(dna),
-                    '"},{"trait_type":"Facial Hair Type","value":"',
-                    getFacialHairType(dna),
                     '"}'
                 )
             );
@@ -150,8 +145,6 @@ contract PlatziPunks is ERC721, ERC721Enumerable, ADNBase, VRFConsumerBase {
                     getHairColor(dna),
                     '"},{"trait_type":"Hat Color","value":"',
                     getHatColor(dna),
-                    '"},{"trait_type":"Graphic Type","value":"',
-                    getGraphicType(dna),
                     '"},{"trait_type":"Mouth Type","value":"',
                     getMouthType(dna),
                     '"},{"trait_type":"Skin Color","value":"',
@@ -206,7 +199,7 @@ contract PlatziPunks is ERC721, ERC721Enumerable, ADNBase, VRFConsumerBase {
      /** 
      * Requests randomness 
      */
-    function getRandomNumber() public returns (bytes32 requestId) {
+    function getRandomNumber() internal returns (bytes32 requestId) {
         require(LINK.balanceOf(address(this)) >= _oracleFee, "Not enough LINK - fill contract with faucet");
         return requestRandomness(_keyHash, _oracleFee);
     }
@@ -217,6 +210,5 @@ contract PlatziPunks is ERC721, ERC721Enumerable, ADNBase, VRFConsumerBase {
     function fulfillRandomness(bytes32 requestId, uint256 randomness) internal override {
         uint256 tokenId = tokenRandomnessResult[requestId];
         tokenDNA[tokenId] = getDNA(tokenId, tokenMinter[tokenId], randomness);
-        _safeMint(msg.sender, tokenId);
     }
 }
